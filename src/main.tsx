@@ -1,80 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom/client';
-import { BookOpen, CalendarDays, ChevronRight, HeartHandshake, Users, Bell } from 'lucide-react';
+import { Bell, BookOpen, CalendarDays, ChevronRight, HeartHandshake, Home, MessageCircle, Plus, Send, ShieldCheck, Users } from 'lucide-react';
 import './styles.css';
 
-const verse = {
-  reference: 'Salmos 46:1',
-  text: 'Dios es nuestro amparo y nuestra fuerza, nuestra ayuda segura en momentos de angustia.'
-};
+type Role='Alumno'|'Maestro'; type Page='Inicio'|'Lección'|'Calendario'|'Cofre'|'Clase'|'Mensajes'|'Asistencia';
+type Prayer={id:number;text:string;type:string;author:string;until:string};
+const people=[{name:'Ana Martínez',role:'Maestra',online:true},{name:'Lucas Fernández',role:'Maestro',online:false},{name:'Sofía',role:'Alumna',online:true},{name:'Mateo',role:'Alumno',online:true},{name:'Valentina',role:'Alumna',online:false},{name:'Tomás',role:'Alumno',online:false}];
+const initialPrayers:Prayer[]=[{id:1,text:'Por mi familia y por sabiduría para esta semana.',type:'Pedido de oración',author:'Sofía',until:'6 sep.'},{id:2,text:'Que podamos acompañar a todos los que están pasando por un momento difícil.',type:'Pedido especial',author:'Ana Martínez',until:'30 ago.'},{id:3,text:'Gracias por una respuesta que estábamos esperando.',type:'Agradecimiento',author:'Mateo',until:'13 sep.'}];
+const events=[['29 ago.','Clase semanal','Reunión de JALubo'],['5 sep.','Actividad','Dinámica de integración'],['12 sep.','Clase especial','Lección + merienda'],['26 sep.','Actividad','Salida de la clase']];
 
-function App() {
-  return (
-    <div className="app-shell">
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand-mark">J</div>
-          <div>
-            <strong>JALubo</strong>
-            <span>Tu clase, también durante la semana.</span>
-          </div>
-        </div>
-        <button className="icon-button" aria-label="Notificaciones"><Bell size={20} /></button>
-      </header>
-
-      <main className="content">
-        <section className="hero-card">
-          <div className="eyebrow">VERSÍCULO DE LA SEMANA</div>
-          <h1>“{verse.text}”</h1>
-          <p>{verse.reference}</p>
-          <div className="lesson-pill"><BookOpen size={16} /> Lección de esta semana</div>
-        </section>
-
-        <section className="welcome">
-          <p className="eyebrow">BIENVENIDO A JALUBO</p>
-          <h2>Un lugar para aprender, acompañarnos y orar juntos.</h2>
-        </section>
-
-        <section className="feature-grid">
-          <FeatureCard icon={<BookOpen />} title="La lección" text="Leé la lección de esta semana y preparate para compartir." />
-          <FeatureCard icon={<CalendarDays />} title="Calendario" text="Mirá las actividades y eventos de todo el año." />
-          <FeatureCard icon={<HeartHandshake />} title="Cofre de oración" text="Dejá un pedido y permití que nuestra clase ore por vos." featured />
-          <FeatureCard icon={<Users />} title="Mi clase" text="Conocé a tus maestros y compañeros y mantenete conectado." />
-        </section>
-
-        <section className="next-card">
-          <div>
-            <span className="eyebrow">PRÓXIMA ACTIVIDAD</span>
-            <h3>Nos vemos en la próxima clase</h3>
-            <p>Muy pronto los maestros podrán publicar aquí las actividades.</p>
-          </div>
-          <ChevronRight size={22} />
-        </section>
-      </main>
-
-      <nav className="bottom-nav">
-        <span className="active">Inicio</span>
-        <span>Lección</span>
-        <span>Cofre</span>
-        <span>Clase</span>
-      </nav>
-    </div>
-  );
-}
-
-function FeatureCard({ icon, title, text, featured = false }: { icon: React.ReactNode; title: string; text: string; featured?: boolean }) {
-  return (
-    <button className={`feature-card ${featured ? 'featured' : ''}`}>
-      <div className="feature-icon">{icon}</div>
-      <div className="feature-copy">
-        <h3>{title}</h3>
-        <p>{text}</p>
-      </div>
-      <ChevronRight className="arrow" size={18} />
-    </button>
-  );
-}
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode><App /></React.StrictMode>
-);
+function App(){const[page,setPage]=useState<Page>('Inicio');const[role,setRole]=useState<Role>('Alumno');const[notifications,setNotifications]=useState(2);const[show,setShow]=useState(false);const[prayers,setPrayers]=useState(initialPrayers);const[text,setText]=useState('');const[sent,setSent]=useState(false);const[message,setMessage]=useState('');const[messages,setMessages]=useState(['¡Hola! Te esperamos en la próxima actividad.','Gracias por escribirme. ¡Dios te bendiga!']);
+ const nav=(p:Page)=>{setPage(p);scrollTo(0,0)}; const addPrayer=()=>{if(!text.trim())return;setPrayers([{id:Date.now(),text,type:'Pedido de oración',author:'Vos',until:'7 sep.'},...prayers]);setText('');setSent(true);setNotifications(n=>n+1)};const send=()=>{if(!message.trim())return;setMessages([...messages,message]);setMessage('')};
+ return <div className="app-shell"><header className="topbar"><button className="brand brand-button" onClick={()=>nav('Inicio')}><div className="brand-mark">J</div><div><strong>JALubo</strong><span>Tu clase, también durante la semana.</span></div></button><div className="top-actions"><div className="role-switch"><button className={role==='Alumno'?'selected':''} onClick={()=>setRole('Alumno')}>Alumno</button><button className={role==='Maestro'?'selected':''} onClick={()=>setRole('Maestro')}>Maestro</button></div><button className="icon-button notification-button" onClick={()=>setShow(!show)}><Bell size={20}/>{notifications>0&&<b>{notifications}</b>}</button></div>{show&&<div className="notification-panel"><strong>Notificaciones</strong><Notice title="Te extrañamos en la clase" text="Esperamos verte en las próximas actividades. Bendiciones."/><Notice title="Nuevo pedido en el Cofre" text="Alguien de la clase pidió oración."/></div>}</header><main className="content">{page==='Inicio'&&<HomePage role={role} nav={nav}/>} {page==='Lección'&&<LessonPage role={role}/>} {page==='Calendario'&&<CalendarPage role={role}/>} {page==='Cofre'&&<PrayerPage role={role} prayers={prayers} text={text} setText={setText} add={addPrayer} sent={sent}/>} {page==='Clase'&&<ClassPage nav={nav}/>} {page==='Mensajes'&&<MessagesPage messages={messages} value={message} setValue={setMessage} send={send}/>} {page==='Asistencia'&&role==='Maestro'&&<AttendancePage/>}</main><nav className="bottom-nav"><Nav icon={<Home/>} label="Inicio" active={page==='Inicio'} click={()=>nav('Inicio')}/><Nav icon={<BookOpen/>} label="Lección" active={page==='Lección'} click={()=>nav('Lección')}/><Nav icon={<HeartHandshake/>} label="Cofre" active={page==='Cofre'} click={()=>nav('Cofre')}/><Nav icon={<Users/>} label="Clase" active={page==='Clase'} click={()=>nav('Clase')}/>{role==='Maestro'&&<Nav icon={<ShieldCheck/>} label="Asistencia" active={page==='Asistencia'} click={()=>nav('Asistencia')}/>}</nav></div>}
+function Notice({title,text}:{title:string;text:string}){return <div className="notice"><span>•</span><div><b>{title}</b><small>{text}</small></div></div>}
+function HomePage({role,nav}:{role:Role;nav:(p:Page)=>void}){return <><section className="hero-card"><div className="eyebrow">VERSÍCULO DE LA SEMANA</div><h1>“Dios es nuestro amparo y nuestra fuerza, nuestra ayuda segura en momentos de angustia.”</h1><p>Salmos 46:1</p><button className="lesson-pill" onClick={()=>nav('Lección')}><BookOpen size={16}/>Lección de esta semana<ChevronRight size={15}/></button></section><section className="welcome"><p className="eyebrow">BUEN DÍA, {role.toUpperCase()}</p><h2>Un lugar para aprender, acompañarnos y orar juntos.</h2></section><section className="feature-grid"><Card icon={<BookOpen/>} title="La lección" text="Leé la lección de esta semana y preparate para compartir." click={()=>nav('Lección')}/><Card icon={<CalendarDays/>} title="Calendario" text="Mirá las actividades y eventos de todo el año." click={()=>nav('Calendario')}/><Card icon={<HeartHandshake/>} title="Cofre de oración" text="Dejá un pedido y permití que nuestra clase ore por vos." featured click={()=>nav('Cofre')}/><Card icon={<Users/>} title="Mi clase" text="Conocé a tus maestros y compañeros y mantenete conectado." click={()=>nav('Clase')}/></section><section className="next-card"><div><span className="eyebrow">PRÓXIMA ACTIVIDAD</span><h3>Clase semanal · 29 de agosto</h3><p>Prepará la Lección 9 y vení con ganas de compartir.</p></div><ChevronRight size={22}/></section></>}
+function Frame({title,eyebrow,sub,children}:{title:string;eyebrow:string;sub:string;children:React.ReactNode}){return <div className="page-frame"><div className="page-heading"><p className="eyebrow">{eyebrow}</p><h1>{title}</h1><p>{sub}</p></div>{children}</div>}
+function LessonPage({role}:{role:Role}){return <Frame title="La lección" eyebrow="ESTA SEMANA" sub={role==='Maestro'?'Podés editar y publicar el contenido de la semana.':'Prepará la lección y vení listo para compartir.'}>{role==='Maestro'&&<div className="teacher-banner"><ShieldCheck size={18}/><div><b>Modo maestro</b><span>El contenido publicado será visible para la clase.</span></div><button>Editar</button></div>}<article className="lesson-card"><div className="lesson-number">LECCIÓN 9</div><h2>Una fe que permanece</h2><p className="muted">Esta semana · 24–30 de agosto</p><hr/><h3>Idea central</h3><p>La fe se fortalece cuando conocemos a Dios, recordamos sus promesas y elegimos confiar incluso cuando no vemos todavía el resultado.</p><h3>Para conversar</h3><ol><li>¿Qué promesa de Dios te da esperanza esta semana?</li><li>¿Cómo podemos acompañar a alguien cuya fe está pasando por una prueba?</li><li>¿Qué te gustaría poner en oración como clase?</li></ol><div className="verse-box">“El Señor es mi pastor; nada me faltará.”<strong>Salmos 23:1</strong></div></article></Frame>}
+function CalendarPage({role}:{role:Role}){return <Frame title="Calendario" eyebrow="2026" sub="Todo lo que hacemos, en un solo lugar."><div className="calendar-head"><button>‹</button><strong>Agosto 2026</strong><button>›</button></div><div className="mini-calendar">{['L','M','X','J','V','S','D'].map(d=><b key={d}>{d}</b>)}{Array.from({length:31},(_,i)=><span key={i} className={[5,12,19,26].includes(i+1)?'event-day':''}>{i+1}</span>)}</div><div className="event-list"><h3>Próximas actividades</h3>{events.map(([date,title,desc])=><div className="event" key={date}><time>{date}</time><div><b>{title}</b><span>{desc}</span></div>{role==='Maestro'&&<button>Editar</button>}</div>)}</div>{role==='Maestro'&&<button className="primary"><Plus size={17}/>Agregar actividad</button>}</Frame>}
+function PrayerPage({role,prayers,text,setText,add,sent}:{role:Role;prayers:Prayer[];text:string;setText:(s:string)=>void;add:()=>void;sent:boolean}){return <Frame title="Cofre de oración" eyebrow="UN LUGAR SEGURO" sub="Dejá algo en manos de Dios. La clase puede acompañarte en oración."><div className="chest-card"><div className="chest-icon">♡</div><h2>¿Qué querés dejar hoy?</h2><p>Podés pedir oración, hacer un pedido especial o compartir un agradecimiento.</p><textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Escribí tu pedido aquí..."/><div className="chest-options"><button className="selected">Pedido de oración</button><button>Pedido especial</button><button>Agradecimiento</button></div><label>¿Hasta cuándo querés que oremos por esto?</label><select><option>1 semana</option><option>2 semanas</option><option>1 mes</option></select><button className="primary" onClick={add}>Cerrar el pedido en el cofre <HeartHandshake size={17}/></button>{sent&&<div className="success">Tu pedido quedó guardado. La clase podrá orar por vos.</div>}</div><div className="month-title"><h3>Pedidos del mes</h3><span>{prayers.length} activos</span></div><div className="prayer-list">{prayers.map(p=><div className="prayer" key={p.id}><div className="prayer-top"><span>{p.type}</span><small>hasta {p.until}</small></div><p>“{p.text}”</p>{role==='Maestro'&&<b className="author">Autor: {p.author}</b>}<div className="pray-line"><HeartHandshake size={15}/>Estamos orando por esto</div></div>)}</div></Frame>}
+function ClassPage({nav}:{nav:(p:Page)=>void}){return <Frame title="Mi clase" eyebrow="COMUNIDAD" sub="Maestros y compañeros de JALubo."><div className="people-grid">{people.map(p=><div className="person" key={p.name}><div className="avatar">{p.name[0]}</div><div><b>{p.name}</b><span>{p.role} · {p.online?'En línea':'Últimamente'}</span></div><button onClick={()=>nav('Mensajes')}><MessageCircle size={17}/></button></div>)}</div><div className="class-note"><Users size={20}/><div><b>Estamos para acompañarnos</b><span>Si alguien faltó, podés mandarle un mensaje para hacerle saber que lo esperamos.</span></div></div></Frame>}
+function MessagesPage({messages,value,setValue,send}:{messages:string[];value:string;setValue:(s:string)=>void;send:()=>void}){return <Frame title="Mensajes" eyebrow="ACOMPAÑARNOS" sub="Un mensaje sencillo puede hacer una gran diferencia."><div className="chat"><div className="chat-head"><div className="avatar">S</div><div><b>Sofía</b><span>Compañera de clase</span></div></div><div className="messages">{messages.map((m,i)=><div className={i%2?'bubble received':'bubble sent'} key={i}>{m}</div>)}</div><div className="composer"><input value={value} onChange={e=>setValue(e.target.value)} onKeyDown={e=>e.key==='Enter'&&send()} placeholder="Escribí un mensaje..."/><button onClick={send}><Send size={17}/></button></div></div></Frame>}
+function AttendancePage(){const[students]=useState(['Sofía','Mateo','Valentina','Tomás','Lucas']);const[saved,setSaved]=useState(false);return <Frame title="Asistencia" eyebrow="MODO MAESTRO" sub="Sábado 29 de agosto · Lección 9"><div className="attendance-card"><div className="attendance-head"><div><b>Lista de hoy</b><span>Marcá a quienes no pudieron venir.</span></div><strong>5 alumnos</strong></div>{students.map((s,i)=><label className="attendance-row" key={s}><div className="avatar small">{s[0]}</div><span>{s}</span><input type="checkbox" defaultChecked={i!==1}/></label>)}<button className="primary" onClick={()=>setSaved(true)}>Guardar asistencia <ShieldCheck size={17}/></button>{saved&&<div className="success">Asistencia guardada. Las notificaciones de ausencia quedaron preparadas.</div>}</div><div className="absence-note"><Bell size={18}/><div><b>Mensaje de ausencia</b><span>“Notamos que hoy no pudiste acompañarnos. Te mandamos muchas bendiciones y esperamos verte en las próximas actividades.”</span></div></div></Frame>}
+function Card({icon,title,text,featured,click}:{icon:React.ReactNode;title:string;text:string;featured?:boolean;click:()=>void}){return <button className={`feature-card ${featured?'featured':''}`} onClick={click}><div className="feature-icon">{icon}</div><div className="feature-copy"><h3>{title}</h3><p>{text}</p></div><ChevronRight className="arrow" size={18}/></button>}
+function Nav({icon,label,active,click}:{icon:React.ReactNode;label:string;active:boolean;click:()=>void}){return <button className={active?'active':''} onClick={click}>{icon}<span>{label}</span></button>}
+ReactDOM.createRoot(document.getElementById('root')!).render(<React.StrictMode><App/></React.StrictMode>);
